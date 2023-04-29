@@ -31,10 +31,10 @@ public class ArrayListProductDaoTest {
         Product product = new Product(productCode, "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
         productDao.save(product);
         long productId = product.getId();
-        assertTrue(product.getId() > 0);
-        Product resultProduct = productDao.getProduct(product.getId());
+        assertTrue(productId > 0);
+        Product resultProduct = productDao.getProduct(productId);
         assertNotNull(resultProduct);
-        assertEquals(product, productDao.getProduct(productId));
+        assertEquals(product, resultProduct);
     }
 
     @Test
