@@ -1,5 +1,7 @@
 package com.es.phoneshop.model.product;
 
+import com.es.phoneshop.exception.AddExistingProductException;
+import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.product.dao.ArrayListProductDao;
 import com.es.phoneshop.model.product.dao.ProductDao;
 import org.junit.Before;
@@ -13,92 +15,112 @@ import static org.junit.Assert.*;
 
 public class ArrayListProductDaoTest {
     private ProductDao productDao;
+    private Currency currency;
+    private Product product;
 
     @Before
     public void setup() {
         productDao = ArrayListProductDao.getInstance();
+        currency = Currency.getInstance("USD");
+        product = new Product("test", "Samsung Galaxy S", new BigDecimal(100), currency, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
     }
 
     @Test
-    public void testFindProductsNoResults() {
-        assertFalse(productDao.findProducts().isEmpty());
+    public void getProduct_existingProductId_returnProduct() {
+        Product currentProduct = productDao.findProducts().get(0);
+        long productId = currentProduct.getId();
+
+        Product findProduct = productDao.getProduct(productId);
+
+        assertNotNull(currentProduct);
+        assertEquals(currentProduct, findProduct);
+    }
+
+    @Test(expected = ProductNotFoundException.class)
+    public void getProduct_nonexistentProductId_ProductNotFoundException() {
+        productDao.getProduct(0L);
     }
 
     @Test
-    public void testSaveNewProduct() throws ProductException {
-        Currency usd = Currency.getInstance("USD");
-        String productCode = "test-save-new-product";
-        Product product = new Product(productCode, "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao.save(product);
-        long productId = product.getId();
-        assertTrue(productId > 0);
-        Product resultProduct = productDao.getProduct(productId);
-        assertNotNull(resultProduct);
-        assertEquals(product, resultProduct);
-    }
+    public void findProduct_zeroStockLevel_notFindProductWithZeroStockLevel() {
+        Product currentProduct = productDao.findProducts().get(0);
+        currentProduct.setStock(0);
 
-    @Test
-    public void testSaveExistingProduct() throws ProductException {
-        Currency usd = Currency.getInstance("USD");
-        String productCodeBeforeEditing = "test-save-existing-product";
-        String productCodeAfterEditing = "test-save-edited-product";
-        Product product = new Product(productCodeBeforeEditing, "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao.save(product);
-        long productId = product.getId();
-        product.setCode(productCodeAfterEditing);
-        productDao.save(product);
-        assertEquals(product, productDao.getProduct(productId));
-    }
-
-    @Test(expected = ProductException.class)
-    public void testSaveCopyProductAsNew() throws ProductException {
-        Currency usd = Currency.getInstance("USD");
-        String productCodeBeforeEditing = "test-save-copy-product-as-new";
-        Product product = new Product(productCodeBeforeEditing, "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao.save(product);
-        Product copyProduct = new Product(productCodeBeforeEditing, "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao.save(copyProduct);
-    }
-
-    @Test(expected = ProductException.class)
-    public void testSaveUndefinedProduct() throws ProductException {
-        productDao.save(null);
-    }
-
-    @Test
-    public void testFindProductWithZeroStockLevel() throws ProductException {
-        Currency usd = Currency.getInstance("USD");
-        String productCode = "test-find-product-with-zero-stock-level";
-        Product product = new Product(productCode, "Samsung Galaxy S", new BigDecimal(100), usd, 0, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao.save(product);
         List<Product> products = productDao.findProducts();
-        assertFalse(products.contains(product));
+
+        assertFalse(products.contains(currentProduct));
     }
 
     @Test
-    public void testFindProductWithNullPrice() throws ProductException {
-        Currency usd = Currency.getInstance("USD");
-        String productCode = "test-find-product-with-null-price";
-        Product product = new Product(productCode, "Samsung Galaxy S", null, usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao.save(product);
+    public void findProduct_nullPrice_notFindProductWithNullPrice() {
+        Product currentProduct = productDao.findProducts().get(0);
+        currentProduct.setPrice(null);
+
         List<Product> products = productDao.findProducts();
-        assertFalse(products.contains(product));
+
+        assertFalse(products.contains(currentProduct));
     }
 
-    @Test(expected = ProductException.class)
-    public void testDeleteProduct() throws ProductException {
-        Currency usd = Currency.getInstance("USD");
-        String productCode = "test-delete-product";
-        Product product = new Product(productCode, "Samsung Galaxy S", null, usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao.save(product);
-        long productId = product.getId();
+    @Test
+    public void findProduct_returnProductList() {
+        List<Product> products;
+
+        products = productDao.findProducts();
+
+        assertNotNull(products);
+        assertFalse(products.isEmpty());
+    }
+
+    @Test
+    public void delete_existingProduct_deleteProductFromList() {
+        Product currentProduct = productDao.findProducts().get(0);
+        long productId = currentProduct.getId();
+
         productDao.delete(productId);
-        productDao.getProduct(productId);
+        List<Product> products = productDao.findProducts();
+
+        assertFalse(products.contains(currentProduct));
     }
 
-    @Test(expected = ProductException.class)
-    public void testDeleteNonexistentProduct() throws ProductException {
-        productDao.delete(0L);
+    @Test
+    public void save_newProduct_addProductToList() {
+        int productCount = productDao.findProducts().size() + 1;
+
+        productDao.save(product);
+        List<Product> products = productDao.findProducts();
+
+        assertNotNull(product.getId());
+        assertEquals(productCount, products.size());
+        assertTrue(products.contains(product));
+    }
+
+    @Test
+    public void save_modifiedProduct_modifyProductInList() {
+        Product product = productDao.findProducts().get(0);
+        long productId = product.getId();
+        product.setCode("edit");
+
+        productDao.save(product);
+        Product findProduct = productDao.getProduct(productId);
+
+        assertNotNull(findProduct);
+        assertEquals(product, findProduct);
+    }
+
+    @Test (expected = AddExistingProductException.class)
+    public void save_copyOfExistingProduct_AddExistingProductException() {
+        Product product = productDao.findProducts().get(0);
+        Product newProduct = new Product();
+        ProductMapper.updateProduct(newProduct, product);
+
+        productDao.save(newProduct);
+    }
+
+    @Test(expected = ProductNotFoundException.class)
+    public void save_nonexistentProductId_ProductNotFoundException() {
+        product.setId(0L);
+
+        productDao.save(product);
     }
 
 }

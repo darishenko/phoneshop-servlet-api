@@ -1,12 +1,15 @@
 package com.es.phoneshop.model.product.dao;
 
+import com.es.phoneshop.exception.AddExistingProductException;
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.model.product.ProductException;
+import com.es.phoneshop.model.product.ProductMapper;
+import com.es.phoneshop.exception.ProductNotFoundException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -33,60 +36,60 @@ public class ArrayListProductDao implements ProductDao {
         return instance;
     }
 
-    private Product findOutProductById(Long id) {
-        if (id != null) {
+    @Override
+    public Product getProduct(Long id) {
+        Objects.requireNonNull(id);
+
+        lock.readLock().lock();
+        try {
             return products.stream()
                     .filter(product -> id.equals(product.getId()))
                     .findAny()
-                    .orElse(null);
+                    .orElseThrow(() -> new ProductNotFoundException(
+                            String.format("Product with id= %d wasn't found in the product list", id)
+                    ));
+        } finally {
+            lock.readLock().unlock();
         }
-        return null;
-    }
-
-    @Override
-    public Product getProduct(Long id) throws ProductException {
-        lock.readLock().lock();
-        Product findProduct = findOutProductById(id);
-        lock.readLock().unlock();
-        if (findProduct == null) {
-            throw new ProductException(String.format("Product with id= %d wasn't found in the product list", id));
-        }
-        return findProduct;
     }
 
     @Override
     public List<Product> findProducts() {
         lock.readLock().lock();
-        List<Product> readProducts = products.stream()
-                .filter(product -> product.getPrice() != null)
-                .filter(product -> product.getStock() > 0)
-                .collect(Collectors.toList());
-        lock.readLock().unlock();
-        return readProducts;
+        try {
+            return products.stream()
+                    .filter(product -> product.getPrice() != null)
+                    .filter(product -> product.getStock() > 0)
+                    .collect(Collectors.toList());
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
-    public void save(Product product) throws ProductException {
-        if (product == null) {
-            throw new ProductException("Product to save wasn't defined");
-        }
+    public void save(Product product) {
+        Objects.requireNonNull(product);
 
         lock.writeLock().lock();
         try {
-            Product currentProduct = findOutProductById(product.getId());
-            if (currentProduct != null) {
-                products.set(products.indexOf(currentProduct), product);
+            Long productId = product.getId();
+            if (productId != null) {
+                Product currentProduct = products.stream()
+                        .filter(p -> productId.equals(p.getId()))
+                        .findAny()
+                        .orElseThrow(() -> new ProductNotFoundException(
+                                String.format("Product with id= %d wasn't found in the product list", productId)
+                        ));
+                ProductMapper.updateProduct(currentProduct, product);
             } else {
-                Product copyProduct = products.stream()
+                products.stream()
                         .filter(p -> p.equals(product))
                         .findAny()
-                        .orElse(null);
-                if (copyProduct == null) {
-                    product.setId(++maxId);
-                    products.add(product);
-                } else {
-                    throw new ProductException("The product list already has the same product");
-                }
+                        .ifPresent(p -> {
+                            throw new AddExistingProductException();
+                        });
+                product.setId(++maxId);
+                products.add(product);
             }
         } finally {
             lock.writeLock().unlock();
@@ -94,19 +97,18 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public void delete(Long id) throws ProductException {
+    public void delete(Long id) {
+        Objects.requireNonNull(id);
+
         lock.writeLock().lock();
         try {
-            Product deleteProduct = findOutProductById(id);
-            if (deleteProduct != null) {
-                products.remove(deleteProduct);
-            } else {
-                throw new ProductException("The product to delete wasn't found in the product list");
-            }
+            products.stream()
+                    .filter(product -> id.equals(product.getId()))
+                    .findAny()
+                    .ifPresent(products::remove);
         } finally {
             lock.writeLock().unlock();
         }
-
     }
 
     private void getSampleProducts() {
@@ -126,7 +128,7 @@ public class ArrayListProductDao implements ProductDao {
             save(new Product("simc56", "Siemens C56", new BigDecimal(70), usd, 20, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Siemens/Siemens%20C56.jpg"));
             save(new Product("simc61", "Siemens C61", new BigDecimal(80), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Siemens/Siemens%20C61.jpg"));
             save(new Product("simsxg75", "Siemens SXG75", new BigDecimal(150), usd, 40, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Siemens/Siemens%20SXG75.jpg"));
-        } catch (ProductException e) {
+        } catch (ProductNotFoundException e) {
             e.printStackTrace();
         }
     }
