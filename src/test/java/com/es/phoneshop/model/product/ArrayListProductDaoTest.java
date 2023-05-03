@@ -1,6 +1,6 @@
 package com.es.phoneshop.model.product;
 
-import com.es.phoneshop.exception.AddExistingProductException;
+import com.es.phoneshop.exception.DuplicateProductException;
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.product.dao.ArrayListProductDao;
 import com.es.phoneshop.model.product.dao.ProductDao;
@@ -107,7 +107,7 @@ public class ArrayListProductDaoTest {
         assertEquals(product, findProduct);
     }
 
-    @Test (expected = AddExistingProductException.class)
+    @Test (expected = DuplicateProductException.class)
     public void save_copyOfExistingProduct_AddExistingProductException() {
         Product product = productDao.findProducts().get(0);
         Product newProduct = new Product();
