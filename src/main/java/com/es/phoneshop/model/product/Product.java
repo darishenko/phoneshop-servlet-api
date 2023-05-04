@@ -2,7 +2,9 @@ package com.es.phoneshop.model.product;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Currency;
+import java.util.List;
 import java.util.Objects;
 
 public class Product implements Serializable {
@@ -19,8 +21,10 @@ public class Product implements Serializable {
     private Currency currency;
     private int stock;
     private String imageUrl;
+    private List<Price> priceHistory;
 
     public Product() {
+        priceHistory = new ArrayList<>();
     }
 
     public Product(Long id, String code, String description, BigDecimal price, Currency currency, int stock, String imageUrl) {
@@ -31,6 +35,8 @@ public class Product implements Serializable {
         this.currency = currency;
         this.stock = stock;
         this.imageUrl = imageUrl;
+        this.priceHistory = new ArrayList<>();
+        this.priceHistory.add(new Price(price));
     }
 
     public Product(String code, String description, BigDecimal price, Currency currency, int stock, String imageUrl) {
@@ -40,6 +46,16 @@ public class Product implements Serializable {
         this.currency = currency;
         this.stock = stock;
         this.imageUrl = imageUrl;
+        this.priceHistory = new ArrayList<>();
+        this.priceHistory.add(new Price(price));
+    }
+
+    public List<Price> getPriceHistory() {
+        return priceHistory;
+    }
+
+    public void setPriceHistory(List<Price> priceHistory) {
+        this.priceHistory = priceHistory;
     }
 
     public Long getId() {
@@ -72,6 +88,7 @@ public class Product implements Serializable {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+        this.priceHistory.add(new Price(price));
     }
 
     public Currency getCurrency() {
