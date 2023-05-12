@@ -1,5 +1,7 @@
 package com.es.phoneshop.web;
 
+import com.es.phoneshop.model.product.SortField;
+import com.es.phoneshop.model.product.SortOrder;
 import com.es.phoneshop.model.product.dao.ArrayListProductDao;
 import com.es.phoneshop.model.product.dao.ProductDao;
 import jakarta.servlet.RequestDispatcher;
@@ -42,10 +44,22 @@ public class ProductListPageServletTest {
     }
 
     @Test
-    public void testDoGet() throws ServletException, IOException {
+    public void doGet_setProductAttribute() throws ServletException, IOException {
         servlet.doGet(request, response);
+
         verify(requestDispatcher).forward(request, response);
         verify(request).setAttribute(eq("products"), any());
+    }
+
+    @Test
+    public void doGet_getQuerySortOrder_executeFindProducts() throws ServletException, IOException {
+        when(request.getParameter("query")).thenReturn("query");
+        when(request.getParameter("sort")).thenReturn("price");
+        when(request.getParameter("order")).thenReturn("asc");
+
+        servlet.doGet(request, response);
+
+        verify(productDao).findProducts(eq("query"), eq(SortField.price), eq(SortOrder.asc));
     }
 
 }
