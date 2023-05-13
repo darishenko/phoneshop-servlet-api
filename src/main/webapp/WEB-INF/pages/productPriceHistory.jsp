@@ -22,9 +22,16 @@
                     ${priceHistory.formattedStartDate}
                 </td>
                 <td>
-                    <fmt:formatNumber value="${priceHistory.price}" type="currency" currencySymbol="${product.currency.symbol}"/>
+                    <fmt:formatNumber value="${priceHistory.price}" type="currency"
+                                      currencySymbol="${product.currency.symbol}"/>
                 </td>
             </tr>
         </c:forEach>
     </table>
+
+    <p></p>
+    <div>
+        <tags:recentProducts recentProducts="${recentProducts}"/>
+    </div>
+
 </tags:master>

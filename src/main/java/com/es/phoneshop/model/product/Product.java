@@ -134,4 +134,11 @@ public class Product implements Serializable {
         return Objects.hash(code, description, price, currency, stock, imageUrl);
     }
 
+    @Override
+    public String toString() {
+        return "Product {"
+                + " description " + description
+                + "}";
+    }
+
 }
