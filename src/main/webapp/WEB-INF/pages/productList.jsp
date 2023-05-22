@@ -1,4 +1,3 @@
-
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -41,7 +40,7 @@
                     </a>
                 </td>
                 <td class="price">
-                    <a href="products/${product.id}/priceHistory" style="text-decoration: none">
+                    <a href="products/priceHistory/${product.id}" style="text-decoration: none">
                         <fmt:formatNumber value="${product.price}" type="currency"
                                           currencySymbol="${product.currency.symbol}"/>
                     </a>
@@ -49,4 +48,10 @@
             </tr>
         </c:forEach>
     </table>
+
+    <p></p>
+    <div>
+        <tags:recentProducts recentProducts="${recentProducts}"/>
+    </div>
+
 </tags:master>

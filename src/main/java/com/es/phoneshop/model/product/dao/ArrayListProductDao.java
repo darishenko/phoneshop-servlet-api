@@ -4,8 +4,8 @@ import com.es.phoneshop.exception.DuplicateProductException;
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductMapper;
-import com.es.phoneshop.model.product.SortField;
-import com.es.phoneshop.model.product.SortOrder;
+import com.es.phoneshop.model.product.sortEnum.SortField;
+import com.es.phoneshop.model.product.sortEnum.SortOrder;
 import com.es.phoneshop.model.product.comparator.SearchProductDescriptionComparator;
 
 import java.util.*;
@@ -35,7 +35,7 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public Product getProduct(Long id) {
+    public Product getProduct(Long id) throws ProductNotFoundException {
         Objects.requireNonNull(id);
 
         lock.readLock().lock();
@@ -69,7 +69,7 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public void save(Product product) {
+    public void save(Product product) throws ProductNotFoundException, DuplicateProductException {
         Objects.requireNonNull(product);
 
         lock.writeLock().lock();

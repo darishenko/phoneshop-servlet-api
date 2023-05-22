@@ -4,6 +4,8 @@ import com.es.phoneshop.exception.DuplicateProductException;
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.product.dao.ArrayListProductDao;
 import com.es.phoneshop.model.product.dao.ProductDao;
+import com.es.phoneshop.model.product.sortEnum.SortField;
+import com.es.phoneshop.model.product.sortEnum.SortOrder;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

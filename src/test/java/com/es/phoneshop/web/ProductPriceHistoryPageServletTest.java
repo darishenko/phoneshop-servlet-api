@@ -1,13 +1,12 @@
 package com.es.phoneshop.web;
 
+import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.RecentProducts;
-import com.es.phoneshop.model.product.service.DefaultRecentProductsService;
-import com.es.phoneshop.model.product.service.RecentProductsService;
-import com.es.phoneshop.model.product.sortEnum.SortField;
-import com.es.phoneshop.model.product.sortEnum.SortOrder;
 import com.es.phoneshop.model.product.dao.ArrayListProductDao;
 import com.es.phoneshop.model.product.dao.ProductDao;
+import com.es.phoneshop.model.product.service.DefaultRecentProductsService;
+import com.es.phoneshop.model.product.service.RecentProductsService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -25,23 +24,22 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProductListPageServletTest {
-    private static final String PRODUCT_LIST_JSP = "/WEB-INF/pages/productList.jsp";
+public class ProductPriceHistoryPageServletTest {
+    private static final String PRODUCT_PRICE_HISTORY_JSP = "/WEB-INF/pages/productPriceHistory.jsp";
 
-    private static final String QUERY_REQUEST_PARAMETER = "query";
-    private static final String SORT_REQUEST_PARAMETER = "sort";
-    private static final String ORDER_REQUEST_PARAMETER = "order";
-
-    private static final String PRODUCTS_REQUEST_ATTRIBUTE = "products";
+    private static final String PRODUCT_REQUEST_ATTRIBUTE = "product";
     private static final String RECENT_PRODUCTS_REQUEST_ATTRIBUTE = "recentProducts";
 
+    private final ProductPriceHistoryPageServlet servlet = new ProductPriceHistoryPageServlet();
+    private final long productId = 1L;
+    private final Product product = new Product();
     private final Deque<Product> products = new ArrayDeque<>();
-    private final ProductListPageServlet servlet = new ProductListPageServlet();
     @Mock
     private RecentProducts recentProducts = Mockito.mock(RecentProducts.class);
     @Mock
@@ -64,6 +62,7 @@ public class ProductListPageServletTest {
         servlet.init(serverConfig);
         servlet.setProductDao(productDao);
         servlet.setRecentProductsService(recentProductsService);
+        product.setId(productId);
 
         when(request.getSession()).thenReturn(httpSession);
         when(recentProducts.getProducts()).thenReturn(products);
@@ -72,33 +71,33 @@ public class ProductListPageServletTest {
     }
 
     @Test
-    public void doGet_setProductAttribute() throws ServletException, IOException {
-        servlet.doGet(request, response);
-
-        verify(requestDispatcher).forward(request, response);
-        verify(request).setAttribute(eq(PRODUCTS_REQUEST_ATTRIBUTE), any());
-        verify(request).getRequestDispatcher(eq(PRODUCT_LIST_JSP));
-    }
-
-    @Test
-    public void doGet_getQuerySortOrder_executeFindProducts() throws ServletException, IOException {
-        when(request.getParameter(QUERY_REQUEST_PARAMETER)).thenReturn("query");
-        when(request.getParameter(SORT_REQUEST_PARAMETER)).thenReturn("price");
-        when(request.getParameter(ORDER_REQUEST_PARAMETER)).thenReturn("asc");
+    public void doGet_productId_forwardToProductPriceHistory() throws ServletException, IOException {
+        when(request.getPathInfo()).thenReturn("/" + productId);
+        when(productDao.getProduct(productId)).thenReturn(product);
 
         servlet.doGet(request, response);
 
-        verify(productDao).findProducts(eq("query"), eq(SortField.price), eq(SortOrder.asc));
-        verify(request).getRequestDispatcher(eq(PRODUCT_LIST_JSP));
-    }
-
-    @Test
-    public void doGet_recentProducts_setRecentProductAttribute() throws ServletException, IOException {
-        servlet.doGet(request, response);
-
-        verify(requestDispatcher).forward(request, response);
+        verify(request).setAttribute(eq(PRODUCT_REQUEST_ATTRIBUTE), eq(product));
         verify(request).setAttribute(eq(RECENT_PRODUCTS_REQUEST_ATTRIBUTE), eq(products));
-        verify(request).getRequestDispatcher(eq(PRODUCT_LIST_JSP));
+        verify(request).getRequestDispatcher(eq(PRODUCT_PRICE_HISTORY_JSP));
+        verify(requestDispatcher).forward(request, response);
+    }
+
+    @Test
+    public void doGet_noProductIdInRequestPath_pageNotFoundError() throws ServletException, IOException {
+        when(request.getPathInfo()).thenReturn("/");
+
+        servlet.doGet(request, response);
+
+        verify(response).sendError(eq(HttpServletResponse.SC_NOT_FOUND));
+    }
+
+    @Test(expected = ProductNotFoundException.class)
+    public void doGet_nonexistentProductId_ProductNotFoundException() throws ServletException, IOException {
+        when(request.getPathInfo()).thenReturn("/" + productId);
+        when(productDao.getProduct(productId)).thenThrow(ProductNotFoundException.class);
+
+        servlet.doGet(request, response);
     }
 
 }
