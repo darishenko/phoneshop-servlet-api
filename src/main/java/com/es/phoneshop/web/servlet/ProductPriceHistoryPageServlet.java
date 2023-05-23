@@ -1,4 +1,4 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.web.servlet;
 
 import com.es.phoneshop.model.product.RecentProducts;
 import com.es.phoneshop.model.product.dao.ArrayListProductDao;
@@ -23,22 +23,6 @@ public class ProductPriceHistoryPageServlet extends HttpServlet {
     private ProductDao productDao;
     private RecentProductsService recentProductsService;
 
-    public ProductDao getProductDao() {
-        return productDao;
-    }
-
-    public void setProductDao(ProductDao productDao) {
-        this.productDao = productDao;
-    }
-
-    public RecentProductsService getRecentProductsService() {
-        return recentProductsService;
-    }
-
-    public void setRecentProductsService(RecentProductsService recentProductsService) {
-        this.recentProductsService = recentProductsService;
-    }
-
     @Override
     public void init(ServletConfig servletConfig) throws ServletException {
         super.init(servletConfig);
@@ -52,6 +36,7 @@ public class ProductPriceHistoryPageServlet extends HttpServlet {
         Long productId = getProductIdFromRequestPath(request, response);
         HttpSession session = request.getSession();
         RecentProducts recentProducts =  recentProductsService.getRecentProducts(session);
+
         request.setAttribute(RECENT_PRODUCTS_REQUEST_ATTRIBUTE, recentProducts.getProducts());
         request.setAttribute(PRODUCT_REQUEST_ATTRIBUTE, productDao.getProduct(productId));
         request.getRequestDispatcher(PRODUCT_PRICE_HISTORY_JSP).forward(request, response);

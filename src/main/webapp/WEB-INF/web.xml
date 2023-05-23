@@ -13,13 +13,13 @@
 
 
   <listener>
-    <listener-class>com.es.phoneshop.web.DemoDataServletContextListener</listener-class>
+    <listener-class>com.es.phoneshop.web.listener.DemoDataServletContextListener</listener-class>
   </listener>
 
 
   <servlet>
     <servlet-name>productList</servlet-name>
-    <servlet-class>com.es.phoneshop.web.ProductListPageServlet</servlet-class>
+    <servlet-class>com.es.phoneshop.web.servlet.ProductListPageServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>productList</servlet-name>
@@ -28,7 +28,7 @@
 
   <servlet>
     <servlet-name>product</servlet-name>
-    <servlet-class>com.es.phoneshop.web.ProductDetailsPageServlet</servlet-class>
+    <servlet-class>com.es.phoneshop.web.servlet.ProductDetailsPageServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>product</servlet-name>
@@ -37,11 +37,38 @@
 
   <servlet>
     <servlet-name>productPriceHistory</servlet-name>
-    <servlet-class>com.es.phoneshop.web.ProductPriceHistoryPageServlet</servlet-class>
+    <servlet-class>com.es.phoneshop.web.servlet.ProductPriceHistoryPageServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>productPriceHistory</servlet-name>
     <url-pattern>/products/priceHistory/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>cartPage</servlet-name>
+    <servlet-class>com.es.phoneshop.web.servlet.CartPageServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>cartPage</servlet-name>
+    <url-pattern>/cart</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>deleteCartItem</servlet-name>
+    <servlet-class>com.es.phoneshop.web.servlet.DeleteCartItemServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>deleteCartItem</servlet-name>
+    <url-pattern>/cart/deleteCartItem/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>minicart</servlet-name>
+    <servlet-class>com.es.phoneshop.web.servlet.MiniCartServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>minicart</servlet-name>
+    <url-pattern>/cart/minicart</url-pattern>
   </servlet-mapping>
 
 

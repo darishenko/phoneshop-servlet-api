@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" %>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -7,11 +7,11 @@
 <jsp:useBean id="product" type="com.es.phoneshop.model.product.Product" scope="request"/>
 <tags:master pageTitle="Product Details">
     <p style="font-weight: bold">
-        ${product.description}
+            ${product.description}
     </p>
     <c:if test="${not empty param.message and empty addToCartError}">
         <div class="success">
-            ${param.message}
+                ${param.message}
         </div>
     </c:if>
     <c:if test="${not empty addToCartError}">
@@ -20,7 +20,7 @@
         </div>
     </c:if>
     <p>
-        ${cart}
+            ${cart}
     </p>
     <form method="post">
         <table>
@@ -34,13 +34,13 @@
             <tr>
                 <td>Code</td>
                 <td>
-                    ${product.code}
+                        ${product.code}
                 </td>
             </tr>
             <tr>
                 <td>Stock</td>
                 <td>
-                    ${product.stock}
+                        ${product.stock}
                 </td>
             </tr>
             <tr>
@@ -56,7 +56,7 @@
                     <input class="quantity" name="quantity" value="${not empty addToCartError ? param.quantity : 1}">
                     <c:if test="${not empty addToCartError}">
                         <div class="error">
-                            ${addToCartError}
+                                ${addToCartError}
                         </div>
                     </c:if>
                 </td>
