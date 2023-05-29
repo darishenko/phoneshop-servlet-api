@@ -1,4 +1,4 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.web.servlet;
 
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.exception.ProductNotFoundException;
@@ -24,7 +24,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.util.ArrayDeque;
+import java.lang.reflect.Field;
 import java.util.Deque;
 import java.util.Locale;
 
@@ -41,12 +41,12 @@ public class ProductDetailsPageServletTest {
     private static final String ADD_TO_CART_ERROR_REQUEST_ATTRIBUTE = "addToCartError";
 
     private final Long productId = 1L;
-    private final Cart cart = new Cart();
     private final Product product = new Product();
-    private final Locale locale = new Locale("ru");
-    private final Deque<Product> products = new ArrayDeque<>();
     private final ProductDetailsPageServlet servlet = new ProductDetailsPageServlet();
-
+    @Mock
+    private Cart cart;
+    @Mock
+    private Deque<Product> products;
     @Mock
     private ProductDao productDao = Mockito.mock(ArrayListProductDao.class);
     @Mock
@@ -67,11 +67,12 @@ public class ProductDetailsPageServletTest {
     private HttpSession httpSession;
 
     @Before
-    public void setup() throws ServletException {
+    public void setup() throws ServletException, NoSuchFieldException, IllegalAccessException {
         servlet.init(serverConfig);
-        servlet.setProductDao(productDao);
-        servlet.setRecentProductsService(recentProductsService);
-        servlet.setCartService(cartService);
+        setCartService();
+        setRecentProductsService();
+        setProductDao();
+
         product.setId(productId);
 
         when(request.getSession()).thenReturn(httpSession);
@@ -82,7 +83,7 @@ public class ProductDetailsPageServletTest {
 
     @Test
     public void doGet_productDetailsPath_forward() throws ServletException, IOException {
-        when(request.getPathInfo()).thenReturn("/" + productId);
+        setProductIdInRequestPath();
         when(productDao.getProduct(productId)).thenReturn(product);
         when(cartService.getCart(httpSession)).thenReturn(cart);
 
@@ -106,7 +107,7 @@ public class ProductDetailsPageServletTest {
 
     @Test(expected = ProductNotFoundException.class)
     public void doGet_nonexistentProductId_ProductNotFoundException() throws ServletException, IOException {
-        when(request.getPathInfo()).thenReturn("/" + productId);
+        setProductIdInRequestPath();
         when(productDao.getProduct(productId)).thenThrow(ProductNotFoundException.class);
 
         servlet.doGet(request, response);
@@ -116,9 +117,21 @@ public class ProductDetailsPageServletTest {
 
     @Test
     public void doPost_quantityNotNumber_setAddToCartErrorAttribute() throws ServletException, IOException {
-        when(request.getPathInfo()).thenReturn("/" + productId);
+        setLocale();
+        setProductIdInRequestPath();
         when(request.getParameter(QUANTITY_REQUEST_ATTRIBUTE)).thenReturn(QUANTITY_REQUEST_ATTRIBUTE);
-        when(request.getLocale()).thenReturn(locale);
+
+        servlet.doPost(request, response);
+
+        verify(request).setAttribute(eq(ADD_TO_CART_ERROR_REQUEST_ATTRIBUTE), anyString());
+        verify(response, never()).sendRedirect(anyString());
+    }
+
+    @Test
+    public void doPost_quantityNotIntegerNumber_setAddToCartErrorAttribute() throws ServletException, IOException {
+        setLocale();
+        setProductIdInRequestPath();
+        when(request.getParameter(QUANTITY_REQUEST_ATTRIBUTE)).thenReturn("1,1");
 
         servlet.doPost(request, response);
 
@@ -130,9 +143,9 @@ public class ProductDetailsPageServletTest {
     public void doPost_productStockMoreThenQuantity_redirectWithSuccessMessage() throws ServletException, IOException {
         String redirectPath = String.format("%s/products/%d?message=%s", request.getContextPath(), productId,
                 "Product was added to cart");
-        when(request.getPathInfo()).thenReturn("/" + productId);
+        setLocale();
+        setProductIdInRequestPath();
         when(request.getParameter(QUANTITY_REQUEST_ATTRIBUTE)).thenReturn("1");
-        when(request.getLocale()).thenReturn(locale);
 
         servlet.doPost(request, response);
 
@@ -141,9 +154,9 @@ public class ProductDetailsPageServletTest {
 
     @Test
     public void doPost_addToCartQuantityMoreThenAvailable_outOfStockException() throws OutOfStockException, ServletException, IOException {
-        when(request.getPathInfo()).thenReturn("/" + productId);
+        setLocale();
+        setProductIdInRequestPath();
         when(request.getParameter(QUANTITY_REQUEST_ATTRIBUTE)).thenReturn("1");
-        when(request.getLocale()).thenReturn(locale);
         when(cartService.getCart(httpSession)).thenReturn(cart);
         doThrow(OutOfStockException.class).when(cartService).add(cart, productId, 1);
 
@@ -151,6 +164,33 @@ public class ProductDetailsPageServletTest {
 
         verify(request).setAttribute(eq(ADD_TO_CART_ERROR_REQUEST_ATTRIBUTE), anyString());
         verify(response, never()).sendRedirect(anyString());
+    }
+
+    private void setProductIdInRequestPath(){
+        when(request.getPathInfo()).thenReturn("/" + productId);
+    }
+
+    private void setLocale(){
+        when(request.getLocale()).thenReturn(new Locale("ru"));
+    }
+
+    private void setCartService() throws IllegalAccessException, NoSuchFieldException {
+        Field cartServiceField = ProductDetailsPageServlet.class.getDeclaredField("cartService");
+        cartServiceField.setAccessible(true);
+        cartServiceField.set(servlet, cartService);
+    }
+
+    private void setRecentProductsService() throws IllegalAccessException, NoSuchFieldException {
+        Field recentProductsServiceField = ProductDetailsPageServlet.class
+                .getDeclaredField("recentProductsService");
+        recentProductsServiceField.setAccessible(true);
+        recentProductsServiceField.set(servlet, recentProductsService);
+    }
+
+    private void setProductDao() throws IllegalAccessException, NoSuchFieldException {
+        Field productDaoField = ProductDetailsPageServlet.class.getDeclaredField("productDao");
+        productDaoField.setAccessible(true);
+        productDaoField.set(servlet, productDao);
     }
 
 }

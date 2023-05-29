@@ -1,4 +1,4 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.web.listener;
 
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.dao.ArrayListProductDao;
@@ -17,15 +17,6 @@ public class DemoDataServletContextListener implements ServletContextListener {
     public DemoDataServletContextListener() {
         productDao = ArrayListProductDao.getInstance();
     }
-
-    public ProductDao getProductDao() {
-        return productDao;
-    }
-
-    public void setProductDao(ProductDao productDao) {
-        this.productDao = productDao;
-    }
-
     @Override
     public void contextInitialized(ServletContextEvent event) {
         boolean insertDemoData = Boolean.parseBoolean(event.getServletContext().getInitParameter("insertDemoData"));

@@ -1,4 +1,4 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.web.servlet;
 
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.product.Product;
@@ -7,6 +7,7 @@ import com.es.phoneshop.model.product.dao.ArrayListProductDao;
 import com.es.phoneshop.model.product.dao.ProductDao;
 import com.es.phoneshop.model.product.service.DefaultRecentProductsService;
 import com.es.phoneshop.model.product.service.RecentProductsService;
+import com.es.phoneshop.web.servlet.ProductPriceHistoryPageServlet;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -21,7 +22,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.util.ArrayDeque;
+import java.lang.reflect.Field;
 import java.util.Deque;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -39,7 +40,8 @@ public class ProductPriceHistoryPageServletTest {
     private final ProductPriceHistoryPageServlet servlet = new ProductPriceHistoryPageServlet();
     private final long productId = 1L;
     private final Product product = new Product();
-    private final Deque<Product> products = new ArrayDeque<>();
+    @Mock
+    private Deque<Product> products;
     @Mock
     private RecentProducts recentProducts = Mockito.mock(RecentProducts.class);
     @Mock
@@ -58,10 +60,10 @@ public class ProductPriceHistoryPageServletTest {
     private HttpSession httpSession;
 
     @Before
-    public void setup() throws ServletException {
+    public void setup() throws ServletException, NoSuchFieldException, IllegalAccessException {
         servlet.init(serverConfig);
-        servlet.setProductDao(productDao);
-        servlet.setRecentProductsService(recentProductsService);
+        setProductDao();
+        setRecentProductsService();
         product.setId(productId);
 
         when(request.getSession()).thenReturn(httpSession);
@@ -98,6 +100,19 @@ public class ProductPriceHistoryPageServletTest {
         when(productDao.getProduct(productId)).thenThrow(ProductNotFoundException.class);
 
         servlet.doGet(request, response);
+    }
+
+    private void setProductDao() throws IllegalAccessException, NoSuchFieldException {
+        Field productDaoField = ProductPriceHistoryPageServlet.class.getDeclaredField("productDao");
+        productDaoField.setAccessible(true);
+        productDaoField.set(servlet, productDao);
+    }
+
+    private void setRecentProductsService() throws IllegalAccessException, NoSuchFieldException {
+        Field recentProductsServiceField = ProductPriceHistoryPageServlet.class
+                .getDeclaredField("recentProductsService");
+        recentProductsServiceField.setAccessible(true);
+        recentProductsServiceField.set(servlet, recentProductsService);
     }
 
 }
