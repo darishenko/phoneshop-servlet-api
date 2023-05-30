@@ -1,33 +1,38 @@
 package com.es.phoneshop.model.cart;
 
+import com.es.phoneshop.model.Item;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class Cart implements Serializable {
+public class Cart extends Item implements Serializable, Cloneable {
     private List<CartItem> items;
     private int totalQuantity;
     private BigDecimal totalCost;
 
-    public int getTotalQuantity() {
-        return totalQuantity;
+    public Cart() {
+        super();
+        this.items = new ArrayList<>();
+        totalCost = new BigDecimal(0);
     }
 
-    public BigDecimal getTotalCost() {
-        return totalCost;
+    public int getTotalQuantity() {
+        return totalQuantity;
     }
 
     public void setTotalQuantity(int totalQuantity) {
         this.totalQuantity = totalQuantity;
     }
 
-    public void setTotalCost(BigDecimal totalCost) {
-        this.totalCost = totalCost;
+    public BigDecimal getTotalCost() {
+        return totalCost;
     }
 
-    public Cart() {
-        this.items = new ArrayList<>();
+    public void setTotalCost(BigDecimal totalCost) {
+        this.totalCost = totalCost;
     }
 
     public List<CartItem> getItems() {
@@ -54,8 +59,20 @@ public class Cart implements Serializable {
 
     @Override
     public String toString() {
-        return "Cart {"
-                + items.toString()
-                + "}";
+        return "Cart {" + items.toString() + "}";
     }
+
+    @Override
+    public Cart clone() {
+        try {
+            Cart cart = (Cart) super.clone();
+            cart.items = this.items.stream()
+                    .map(CartItem::clone)
+                    .collect(Collectors.toList());
+            return cart;
+        } catch (CloneNotSupportedException cloneNotSupportedException) {
+            throw new RuntimeException("Clone is not supported");
+        }
+    }
+
 }

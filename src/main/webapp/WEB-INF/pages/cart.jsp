@@ -18,6 +18,7 @@
             </c:if>
         </c:otherwise>
     </c:choose>
+    <c:if test="${not empty cart.items}">
     <form method="post" action="${pageContext.servletContext.contextPath}/cart">
         <table>
             <thead>
@@ -32,7 +33,6 @@
                 <td class="quantity">
                     Quantity
                 </td>
-                <td/>
             </tr>
             </thead>
             <c:forEach var="item" items="${cart.items}" varStatus="status">
@@ -43,7 +43,7 @@
                     </td>
                     <td>
                         <a href="${pageContext.servletContext.contextPath}/products/${item.product.id}">
-                            ${item.product.description}
+                                ${item.product.description}
                         </a>
                     </td>
                     <td class="price">
@@ -82,17 +82,23 @@
                 </td>
             </tr>
         </table>
-        <p>
+        <p></p>
+        <div class="button-row">
             <c:if test="${not empty cart.items}">
                 <input type="submit" value="Update">
             </c:if>
-        </p>
+        </div>
     </form>
-    <p>
-        <tags:recentProducts recentProducts="${recentProducts}"/>
-    </p>
+    </c:if>
     <form id="deleteCartItem" method="post"
           action="${pageContext.servletContext.contextPath}/cart/deleteItem/${item.product.id}">
     </form>
+    <c:if test="${not empty cart.items}">
+    <form action="${pageContext.servletContext.contextPath}/checkout" method="get">
+        <button type="submit">Checkout</button>
+    </form>
+    </c:if>
+    <p>
+        <tags:recentProducts recentProducts="${recentProducts}"/>
+    </p>
 </tags:master>
-

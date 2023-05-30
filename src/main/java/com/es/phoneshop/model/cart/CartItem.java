@@ -5,7 +5,7 @@ import com.es.phoneshop.model.product.Product;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class CartItem implements Serializable {
+public class CartItem implements Serializable, Cloneable {
     private Product product;
     private int quantity;
 
@@ -36,8 +36,7 @@ public class CartItem implements Serializable {
         if (o == null) return false;
         if (this.getClass() != o.getClass()) return false;
         CartItem cartItem = (CartItem) o;
-        return product.equals(cartItem.product)
-                && quantity == cartItem.quantity;
+        return product.equals(cartItem.product) && quantity == cartItem.quantity;
     }
 
     @Override
@@ -47,9 +46,18 @@ public class CartItem implements Serializable {
 
     @Override
     public String toString() {
-        return "CartItem {"
-                + product
-                + " quantity " + quantity
-                + "}";
+        return "CartItem {" + product + " quantity " + quantity + "}";
     }
+
+    @Override
+    public CartItem clone() {
+        CartItem cartItem;
+        try {
+            cartItem = (CartItem) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Clone is not supported");
+        }
+        return cartItem;
+    }
+
 }

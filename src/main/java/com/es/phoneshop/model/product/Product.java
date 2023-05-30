@@ -1,14 +1,12 @@
 package com.es.phoneshop.model.product;
 
+import com.es.phoneshop.model.Item;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-public class Product implements Serializable {
-    private Long id;
+public class Product extends Item implements Serializable {
     private String code;
     private String description;
     /**
@@ -27,7 +25,7 @@ public class Product implements Serializable {
         priceHistory = new ArrayList<>();
     }
 
-    public Product(Long id, String code, String description, BigDecimal price, Currency currency, int stock, String imageUrl) {
+    public Product(UUID id, String code, String description, BigDecimal price, Currency currency, int stock, String imageUrl) {
         this.id = id;
         this.code = code;
         this.description = description;
@@ -40,6 +38,7 @@ public class Product implements Serializable {
     }
 
     public Product(String code, String description, BigDecimal price, Currency currency, int stock, String imageUrl) {
+        this.id = null;
         this.code = code;
         this.description = description;
         this.price = price;
@@ -56,14 +55,6 @@ public class Product implements Serializable {
 
     public void setPriceHistory(List<Price> priceHistory) {
         this.priceHistory = priceHistory;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getCode() {

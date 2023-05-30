@@ -7,10 +7,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class Price implements Serializable {
+    private static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
     private LocalDate startDate;
     private BigDecimal price;
     private String formattedStartDate;
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
 
     public Price(BigDecimal price) {
         this.price = price;
@@ -25,11 +25,11 @@ public class Price implements Serializable {
     }
 
     public DateTimeFormatter getDateFormatter() {
-        return dateFormatter;
+        return Price.dateFormatter;
     }
 
     public void setDateFormatter(DateTimeFormatter dateFormatter) {
-        this.dateFormatter = dateFormatter;
+        Price.dateFormatter = dateFormatter;
     }
 
     public LocalDate getStartDate() {

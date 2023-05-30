@@ -1,7 +1,7 @@
 package com.es.phoneshop.web.servlet;
 
 import com.es.phoneshop.model.cart.Cart;
-import com.es.phoneshop.model.cart.service.CartService;
+import com.es.phoneshop.service.CartService;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +15,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.UUID;
 
+import static com.es.phoneshop.web.constant.ServletConstant.Message;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,14 +46,15 @@ public class DeleteCartItemServletTest {
 
     @Test
     public void doPost_productId_redirectToCartPageWithSuccessMessage() throws IOException {
-        long productId = 1L;
+        UUID productId = UUID.randomUUID();
         when(request.getPathInfo()).thenReturn("/" + productId);
         when(request.getSession()).thenReturn(httpSession);
         when(cartService.getCart(httpSession)).thenReturn(cart);
 
         servlet.doPost(request, response);
 
-        verify(response).sendRedirect(eq(String.format("%s/cart?message=%s", request.getContextPath(), "Cart item removed successfully")));
+        verify(response).sendRedirect(eq(String.format("%s/cart?message=%s", request.getContextPath(),
+                Message.Success.REMOVE_CART_ITEM)));
     }
 
     private void setCartServiceField() throws IllegalAccessException, NoSuchFieldException {

@@ -1,13 +1,12 @@
 package com.es.phoneshop.web.servlet;
 
-import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.dao.ProductDao;
+import com.es.phoneshop.dao.impl.ArrayListProductDao;
+import com.es.phoneshop.exception.product.ProductNotFoundException;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.RecentProducts;
-import com.es.phoneshop.model.product.dao.ArrayListProductDao;
-import com.es.phoneshop.model.product.dao.ProductDao;
-import com.es.phoneshop.model.product.service.DefaultRecentProductsService;
-import com.es.phoneshop.model.product.service.RecentProductsService;
-import com.es.phoneshop.web.servlet.ProductPriceHistoryPageServlet;
+import com.es.phoneshop.service.RecentProductsService;
+import com.es.phoneshop.service.impl.DefaultRecentProductsService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -24,7 +23,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Deque;
+import java.util.UUID;
 
+import static com.es.phoneshop.web.constant.ServletConstant.JspPage;
+import static com.es.phoneshop.web.constant.ServletConstant.RequestAttribute;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -32,13 +34,8 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProductPriceHistoryPageServletTest {
-    private static final String PRODUCT_PRICE_HISTORY_JSP = "/WEB-INF/pages/productPriceHistory.jsp";
-
-    private static final String PRODUCT_REQUEST_ATTRIBUTE = "product";
-    private static final String RECENT_PRODUCTS_REQUEST_ATTRIBUTE = "recentProducts";
-
     private final ProductPriceHistoryPageServlet servlet = new ProductPriceHistoryPageServlet();
-    private final long productId = 1L;
+    private final UUID productId = UUID.randomUUID();
     private final Product product = new Product();
     @Mock
     private Deque<Product> products;
@@ -75,13 +72,13 @@ public class ProductPriceHistoryPageServletTest {
     @Test
     public void doGet_productId_forwardToProductPriceHistory() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/" + productId);
-        when(productDao.getProduct(productId)).thenReturn(product);
+        when(productDao.getItem(productId)).thenReturn(product);
 
         servlet.doGet(request, response);
 
-        verify(request).setAttribute(eq(PRODUCT_REQUEST_ATTRIBUTE), eq(product));
-        verify(request).setAttribute(eq(RECENT_PRODUCTS_REQUEST_ATTRIBUTE), eq(products));
-        verify(request).getRequestDispatcher(eq(PRODUCT_PRICE_HISTORY_JSP));
+        verify(request).setAttribute(eq(RequestAttribute.PRODUCT), eq(product));
+        verify(request).setAttribute(eq(RequestAttribute.RECENT_PRODUCTS), eq(products));
+        verify(request).getRequestDispatcher(eq(JspPage.PRODUCT_PRICE_HISTORY));
         verify(requestDispatcher).forward(request, response);
     }
 
@@ -97,7 +94,7 @@ public class ProductPriceHistoryPageServletTest {
     @Test(expected = ProductNotFoundException.class)
     public void doGet_nonexistentProductId_ProductNotFoundException() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/" + productId);
-        when(productDao.getProduct(productId)).thenThrow(ProductNotFoundException.class);
+        when(productDao.getItem(productId)).thenThrow(ProductNotFoundException.class);
 
         servlet.doGet(request, response);
     }

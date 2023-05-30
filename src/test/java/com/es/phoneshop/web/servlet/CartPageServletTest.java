@@ -1,12 +1,12 @@
 package com.es.phoneshop.web.servlet;
 
 import com.es.phoneshop.model.cart.Cart;
-import com.es.phoneshop.model.cart.service.CartService;
-import com.es.phoneshop.model.cart.service.DefaultCartService;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.RecentProducts;
-import com.es.phoneshop.model.product.service.DefaultRecentProductsService;
-import com.es.phoneshop.model.product.service.RecentProductsService;
+import com.es.phoneshop.service.CartService;
+import com.es.phoneshop.service.RecentProductsService;
+import com.es.phoneshop.service.impl.DefaultCartService;
+import com.es.phoneshop.service.impl.DefaultRecentProductsService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -24,22 +24,17 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Deque;
 import java.util.Locale;
+import java.util.UUID;
 
+import static com.es.phoneshop.web.constant.ServletConstant.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CartPageServletTest {
-    private static final String CART_JSP = "/WEB-INF/pages/cart.jsp";
-
-    private static final String CART_REQUEST_ATTRIBUTE = "cart";
-    private static final String QUANTITY_REQUEST_ATTRIBUTE = "quantity";
-    private static final String PRODUCT_ID_REQUEST_ATTRIBUTE = "productId";
-    private static final String RECENT_PRODUCTS_REQUEST_ATTRIBUTE = "recentProducts";
-
     private final CartPageServlet servlet = new CartPageServlet();
-    private final long productId = 1L;
+    private final UUID productId = UUID.randomUUID();
     private final Product product = new Product();
     @Mock
     private Deque<Product> products;
@@ -81,45 +76,45 @@ public class CartPageServletTest {
     public void doGet_setAttributes() throws ServletException, IOException {
         servlet.doGet(request, response);
 
-        verify(request).setAttribute(eq(CART_REQUEST_ATTRIBUTE), eq(cart));
-        verify(request).setAttribute(eq(RECENT_PRODUCTS_REQUEST_ATTRIBUTE), eq(products));
+        verify(request).setAttribute(eq(RequestAttribute.CART), eq(cart));
+        verify(request).setAttribute(eq(RequestAttribute.RECENT_PRODUCTS), eq(products));
     }
 
     @Test
     public void doGet_forwardToCart() throws ServletException, IOException {
         servlet.doGet(request, response);
 
-        verify(request).getRequestDispatcher(eq(CART_JSP));
+        verify(request).getRequestDispatcher(eq(JspPage.CART));
         verify(requestDispatcher).forward(request, response);
     }
 
     @Test
     public void doPost_validQuantity_sendRedirect() throws ServletException, IOException {
         beforePost();
-        when(request.getParameterValues(QUANTITY_REQUEST_ATTRIBUTE)).thenReturn(new String[]{"1"});
+        when(request.getParameterValues(RequestAttribute.QUANTITY)).thenReturn(new String[]{"1"});
 
         servlet.doPost(request, response);
 
         verify(response).sendRedirect(eq(String.format("%s/cart?message=%s", request.getContextPath(),
-                "Cart updated successfully")));
+                Message.Success.UPDATE_CART)));
     }
 
     @Test
     public void doPost_invalidQuantity_sendRedirect() throws ServletException, IOException {
         beforePost();
-        when(request.getParameterValues(QUANTITY_REQUEST_ATTRIBUTE)).thenReturn(new String[]{"1,1"});
+        when(request.getParameterValues(RequestAttribute.QUANTITY)).thenReturn(new String[]{"1,1"});
 
         servlet.doPost(request, response);
 
         verify(response, never()).sendRedirect(eq(String.format("%s/cart?message=%s", request.getContextPath(),
-                "Cart updated successfully")));
-        verify(request).getRequestDispatcher(eq(CART_JSP));
+                Message.Success.UPDATE_CART)));
+        verify(request).getRequestDispatcher(eq(JspPage.CART));
         verify(requestDispatcher).forward(request, response);
     }
 
     private void beforePost() {
         when(request.getLocale()).thenReturn(new Locale("ru"));
-        when(request.getParameterValues(PRODUCT_ID_REQUEST_ATTRIBUTE))
+        when(request.getParameterValues(RequestAttribute.PRODUCT_ID))
                 .thenReturn(new String[]{String.valueOf(productId)});
     }
 
