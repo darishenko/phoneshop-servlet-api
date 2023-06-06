@@ -1,7 +1,7 @@
 package com.es.phoneshop.web.listener;
 
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.model.product.dao.ProductDao;
+import com.es.phoneshop.dao.ProductDao;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import org.junit.Before;

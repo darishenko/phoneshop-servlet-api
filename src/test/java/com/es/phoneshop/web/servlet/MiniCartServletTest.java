@@ -1,7 +1,7 @@
 package com.es.phoneshop.web.servlet;
 
 import com.es.phoneshop.model.cart.Cart;
-import com.es.phoneshop.model.cart.service.CartService;
+import com.es.phoneshop.service.CartService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -17,13 +17,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
+import static com.es.phoneshop.web.constant.ServletConstant.JspPage;
+import static com.es.phoneshop.web.constant.ServletConstant.RequestAttribute;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MiniCartServletTest {
-    private static final String CART_JSP = "/WEB-INF/pages/minicart.jsp";
-    private static final String CART_REQUEST_ATTRIBUTE = "cart";
     private final MiniCartServlet servlet = new MiniCartServlet();
     @Mock
     private CartService cartService;
@@ -47,14 +47,14 @@ public class MiniCartServletTest {
 
         when(request.getSession()).thenReturn(httpSession);
         when(cartService.getCart(httpSession)).thenReturn(cart);
-        when(request.getRequestDispatcher(CART_JSP)).thenReturn(requestDispatcher);
+        when(request.getRequestDispatcher(JspPage.MINI_CART)).thenReturn(requestDispatcher);
     }
 
     @Test
     public void doGet_setRequestCartAttribute() throws IOException, ServletException {
         servlet.doGet(request, response);
 
-        verify(request).setAttribute(CART_REQUEST_ATTRIBUTE, cart);
+        verify(request).setAttribute(RequestAttribute.CART, cart);
     }
 
     @Test

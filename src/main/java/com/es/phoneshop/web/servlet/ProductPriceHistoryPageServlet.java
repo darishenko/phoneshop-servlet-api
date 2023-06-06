@@ -1,10 +1,10 @@
 package com.es.phoneshop.web.servlet;
 
+import com.es.phoneshop.dao.ProductDao;
+import com.es.phoneshop.dao.impl.ArrayListProductDao;
 import com.es.phoneshop.model.product.RecentProducts;
-import com.es.phoneshop.model.product.dao.ArrayListProductDao;
-import com.es.phoneshop.model.product.dao.ProductDao;
-import com.es.phoneshop.model.product.service.DefaultRecentProductsService;
-import com.es.phoneshop.model.product.service.RecentProductsService;
+import com.es.phoneshop.service.RecentProductsService;
+import com.es.phoneshop.service.impl.DefaultRecentProductsService;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -13,13 +13,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.UUID;
+
+import static com.es.phoneshop.web.constant.ServletConstant.JspPage;
+import static com.es.phoneshop.web.constant.ServletConstant.RequestAttribute;
 
 public class ProductPriceHistoryPageServlet extends HttpServlet {
-    private static final String PRODUCT_PRICE_HISTORY_JSP = "/WEB-INF/pages/productPriceHistory.jsp";
-
-    private static final String PRODUCT_REQUEST_ATTRIBUTE = "product";
-    private static final String RECENT_PRODUCTS_REQUEST_ATTRIBUTE = "recentProducts";
-
     private ProductDao productDao;
     private RecentProductsService recentProductsService;
 
@@ -33,23 +32,23 @@ public class ProductPriceHistoryPageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        Long productId = getProductIdFromRequestPath(request, response);
+        UUID productId = getProductIdFromRequestPath(request, response);
         HttpSession session = request.getSession();
-        RecentProducts recentProducts =  recentProductsService.getRecentProducts(session);
+        RecentProducts recentProducts = recentProductsService.getRecentProducts(session);
 
-        request.setAttribute(RECENT_PRODUCTS_REQUEST_ATTRIBUTE, recentProducts.getProducts());
-        request.setAttribute(PRODUCT_REQUEST_ATTRIBUTE, productDao.getProduct(productId));
-        request.getRequestDispatcher(PRODUCT_PRICE_HISTORY_JSP).forward(request, response);
+        request.setAttribute(RequestAttribute.RECENT_PRODUCTS, recentProducts.getProducts());
+        request.setAttribute(RequestAttribute.PRODUCT, productDao.getItem(productId));
+        request.getRequestDispatcher(JspPage.PRODUCT_PRICE_HISTORY).forward(request, response);
     }
 
-    private Long getProductIdFromRequestPath(HttpServletRequest request, HttpServletResponse response)
+    private UUID getProductIdFromRequestPath(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        Long productId = null;
+        UUID productId = null;
         String requestPath = getRequestPath(request);
         if (requestPath.isEmpty()) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
-        }else{
-            productId = Long.valueOf(requestPath);
+        } else {
+            productId = UUID.fromString(requestPath);
         }
         return productId;
     }

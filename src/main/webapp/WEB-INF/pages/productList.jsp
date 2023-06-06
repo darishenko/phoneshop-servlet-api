@@ -33,6 +33,7 @@
                 <tags:sortLink sort="description" order="desc"></tags:sortLink>
             </td>
             <td>Quantity</td>
+            <td>Stock</td>
             <td class="price">
                 Price
                 <tags:sortLink sort="price" order="asc"></tags:sortLink>
@@ -64,6 +65,8 @@
                             <input name="quantity" class="quantity" value="1"/>
                         </c:if>
                     </td>
+
+                    <td>${product.stock}</td>
 
                     <td class="price">
                         <a href="products/priceHistory/${product.id}" style="text-decoration: none">
