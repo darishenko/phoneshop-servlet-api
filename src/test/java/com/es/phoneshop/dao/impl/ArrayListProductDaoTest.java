@@ -39,7 +39,7 @@ public class ArrayListProductDaoTest {
 
     @Test
     public void getProduct_existingProductId_returnProduct() {
-        Product currentProduct = productDao.findProducts("", null, null).get(0);
+        Product currentProduct = productDao.findProducts("", null, null, null, null, null).get(0);
         UUID productId = currentProduct.getId();
 
         Product findProduct = productDao.getItem(productId);
@@ -57,17 +57,17 @@ public class ArrayListProductDaoTest {
     public void findProduct_returnProductList() {
         List<Product> products;
 
-        products = productDao.findProducts("", null, null);
+        products = productDao.findProducts("", null, null, null, null, null);
 
         assertNotNull(products);
     }
 
     @Test
     public void findProduct_queryWordsFromProductDescription_returnProductList() {
-        String queryWords = productDao.findProducts("", null, null).get(0).getDescription();
+        String queryWords = productDao.findProducts("", null, null, null, null, null).get(0).getDescription();
         List<Product> products;
 
-        products = productDao.findProducts(queryWords, null, null);
+        products = productDao.findProducts(queryWords, null, null, null, null, null);
 
         assertTrue(products.contains(product1));
     }
@@ -77,7 +77,7 @@ public class ArrayListProductDaoTest {
         Product product = new Product("priceAscOrder", "Palm Pixi", new BigDecimal(1), currency, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg");
         productDao.save(product);
 
-        List<Product> products = productDao.findProducts("", SortField.price, SortOrder.asc);
+        List<Product> products = productDao.findProducts("", SortField.price, SortOrder.asc, null, null, null);
 
         assertTrue(products.get(1).getPrice().compareTo(products.get(0).getPrice()) >= 0);
     }
@@ -87,17 +87,17 @@ public class ArrayListProductDaoTest {
         Product product = new Product("descriptionDescOrder", "Palm Pixi", new BigDecimal(1), currency, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg");
         productDao.save(product);
 
-        List<Product> products = productDao.findProducts("", SortField.description, SortOrder.desc);
+        List<Product> products = productDao.findProducts("", SortField.description, SortOrder.desc, null, null, null);
 
         assertTrue(products.get(1).getDescription().compareTo(products.get(0).getDescription()) < 0);
     }
 
     @Test
     public void save_newProduct_addProductToList() {
-        int productCount = productDao.findProducts("", null, null).size() + 1;
+        int productCount = productDao.findProducts("", null, null, null, null, null).size() + 1;
 
         productDao.save(product2);
-        List<Product> products = productDao.findProducts("", null, null);
+        List<Product> products = productDao.findProducts("", null, null, null, null, null);
 
         assertNotNull(product2.getId());
         assertEquals(productCount, products.size());
@@ -109,7 +109,7 @@ public class ArrayListProductDaoTest {
         product2.setPrice(new BigDecimal(1));
         product2.setStock(1);
         productDao.save(product2);
-        Product product = productDao.findProducts("", null, null).get(0);
+        Product product = productDao.findProducts("", null, null, null, null, null).get(0);
         UUID productId = product.getId();
         product.setCode("edit");
 
@@ -122,7 +122,7 @@ public class ArrayListProductDaoTest {
 
     @Test(expected = DuplicateProductException.class)
     public void save_copyOfExistingProduct_AddExistingProductException() {
-        Product product = productDao.findProducts("", null, null).get(0);
+        Product product = productDao.findProducts("", null, null, null, null, null).get(0);
         Product newProduct = new Product();
         newProduct.setId(null);
         ProductMapper.updateProduct(newProduct, product);
@@ -140,31 +140,31 @@ public class ArrayListProductDaoTest {
 
     @Test
     public void findProduct_zeroStockLevel_notFindProductWithZeroStockLevel() {
-        Product currentProduct = productDao.findProducts("", null, null).get(0);
+        Product currentProduct = productDao.findProducts("", null, null, null, null, null).get(0);
         currentProduct.setStock(0);
 
-        List<Product> products = productDao.findProducts("", null, null);
+        List<Product> products = productDao.findProducts("", null, null, null, null, null);
 
         assertFalse(products.contains(currentProduct));
     }
 
     @Test
     public void findProduct_nullPrice_notFindProductWithNullPrice() {
-        Product currentProduct = productDao.findProducts("", null, null).get(0);
+        Product currentProduct = productDao.findProducts("", null, null, null, null, null).get(0);
         currentProduct.setPrice(null);
 
-        List<Product> products = productDao.findProducts("", null, null);
+        List<Product> products = productDao.findProducts("", null, null, null, null, null);
 
         assertFalse(products.contains(currentProduct));
     }
 
     @Test
     public void delete_existingProduct_deleteProductFromList() {
-        Product currentProduct = productDao.findProducts("", null, null).get(0);
+        Product currentProduct = productDao.findProducts("", null, null, null, null, null).get(0);
         UUID productId = currentProduct.getId();
 
         productDao.delete(productId);
-        List<Product> products = productDao.findProducts("", null, null);
+        List<Product> products = productDao.findProducts("", null, null, null, null, null);
 
         assertFalse(products.contains(currentProduct));
     }

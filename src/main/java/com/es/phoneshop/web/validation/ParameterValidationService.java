@@ -2,9 +2,11 @@ package com.es.phoneshop.web.validation;
 
 import com.es.phoneshop.enam.order.PaymentMethod;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Locale;
+import java.util.Map;
 
 public interface ParameterValidationService {
     boolean isValidRequiredStringData(String data);
@@ -20,4 +22,8 @@ public interface ParameterValidationService {
     PaymentMethod parsePaymentMethod(String paymentMethod);
 
     int parseQuantity(String quantity, Locale locale) throws ParseException;
+
+    BigDecimal parsePrice(String price, String priceParameterName, Map<String, String> priceErrors, Locale locale);
+
+    void validateMinMaxPrices(BigDecimal minPrice, BigDecimal maxPrice, Map<String, String> priceErrors);
 }

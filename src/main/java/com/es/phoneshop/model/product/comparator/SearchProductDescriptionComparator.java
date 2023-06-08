@@ -4,12 +4,13 @@ import com.es.phoneshop.model.product.Product;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 
 public class SearchProductDescriptionComparator implements Comparator<Product> {
-    private String[] searchWords;
+    private final List<String> searchWords;
 
-    public SearchProductDescriptionComparator(String[] searchWords) {
+    public SearchProductDescriptionComparator(List<String> searchWords) {
         this.searchWords = searchWords;
     }
 
@@ -22,7 +23,7 @@ public class SearchProductDescriptionComparator implements Comparator<Product> {
     }
 
     private long getMatchedWordsCount(String description) {
-        return Arrays.stream(searchWords)
+        return searchWords.stream()
                 .filter(description::contains)
                 .count();
     }

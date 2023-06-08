@@ -9,6 +9,8 @@ public interface ServletConstant {
         String PRODUCT_DETAILS = "/WEB-INF/pages/productDetails.jsp";
         String PRODUCT_LIST = "/WEB-INF/pages/productList.jsp";
         String PRODUCT_PRICE_HISTORY = "/WEB-INF/pages/productPriceHistory.jsp";
+        String ADVANCED_SEARCH = "/WEB-INF/pages/advancedSearch.jsp";
+
     }
 
     interface RequestAttribute {
@@ -16,12 +18,15 @@ public interface ServletConstant {
         String CART = "cart";
         String ADD_TO_CART_ERROR = "addToCartError";
         String UPDATE_CART_ERRORS = "updateCartErrors";
+        String PRICE_ERROR = "priceError";
+        String PRICE_ERRORS = "priceErrors";
         String PRODUCT_ID = "productId";
         String PRODUCT = "product";
         String PRODUCTS = "products";
         String RECENT_PRODUCTS = "recentProducts";
         String ORDER = "order";
         String PLACE_ORDER_ERRORS = "orderErrors";
+        String ACCEPTANCE_CRITERIA = "acceptanceCriteria";
     }
 
     interface RequestParameter {
@@ -30,6 +35,10 @@ public interface ServletConstant {
         String ORDER = "order";
         String PRODUCT_ID = "productId";
         String QUANTITY = "quantity";
+        String ACCEPTANCE_CRITERIA = "acceptanceCriteria";
+        String MIN_PRICE = "minPrice";
+        String MAX_PRICE = "maxPrice";
+
 
         interface Order {
             String LAST_NAME = "lastName";
@@ -49,6 +58,7 @@ public interface ServletConstant {
             String OUT_OF_STOCK = "Not enough items in stock!";
             String PAYMENT_METHOD = "Invalid payment method";
             String DELIVERY_DATE = "Invalid delivery date";
+            String MIN_LESS_MAX_PRICE = "Min price should be less than max price";
         }
 
         interface Success {

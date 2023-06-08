@@ -108,7 +108,7 @@ public class ProductListPageServlet extends HttpServlet {
     private void setRequestAttribute(HttpServletRequest request, String query, String sortField, String sortOrder){
         request.setAttribute(RequestAttribute.PRODUCTS, productDao.findProducts(query,
                 Optional.ofNullable(sortField).map(SortField::valueOf).orElse(null),
-                Optional.ofNullable(sortOrder).map(SortOrder::valueOf).orElse(null))
+                Optional.ofNullable(sortOrder).map(SortOrder::valueOf).orElse(null), null, null, null)
         );
         request.setAttribute(RequestAttribute.RECENT_PRODUCTS, recentProductsService
                 .getRecentProducts(request.getSession()).getProducts());

@@ -92,7 +92,7 @@ public class ProductListPageServletTest {
 
         servlet.doGet(request, response);
 
-        verify(productDao).findProducts(eq("query"), eq(SortField.price), eq(SortOrder.asc));
+        verify(productDao).findProducts(eq("query"), eq(SortField.price), eq(SortOrder.asc), null, null, null);
         verify(request).getRequestDispatcher(eq(JspPage.PRODUCT_LIST));
     }
 

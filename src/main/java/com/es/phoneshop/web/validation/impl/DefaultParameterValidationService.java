@@ -1,8 +1,10 @@
 package com.es.phoneshop.web.validation.impl;
 
 import com.es.phoneshop.enam.order.PaymentMethod;
+import com.es.phoneshop.web.constant.ServletConstant.*;
 import com.es.phoneshop.web.validation.ParameterValidationService;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -10,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.FormatStyle;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -36,7 +39,7 @@ public class DefaultParameterValidationService implements ParameterValidationSer
     @Override
     public boolean isValidPaymentMethod(String paymentMethod) {
         try {
-            PaymentMethod.valueOf(paymentMethod);
+            parsePaymentMethod(paymentMethod);
         } catch (IllegalArgumentException illegalArgumentException) {
             return false;
         }
@@ -77,14 +80,48 @@ public class DefaultParameterValidationService implements ParameterValidationSer
         NumberFormat numberFormat = NumberFormat.getInstance(locale);
         Number quantityNumber = numberFormat.parse(quantity);
 
-        int quantityIntValue = quantityNumber.intValue();
-        if (quantityNumber.doubleValue() != quantityNumber.intValue()) {
-            throw new NumberFormatException("Quantity must be an integer");
+        validateIntegerNumber(quantityNumber);
+        validatePositiveNumber(quantityNumber);
+
+        return quantityNumber.intValue();
+    }
+
+    @Override
+    public BigDecimal parsePrice(String price, String priceParameterName, Map<String, String> priceErrors, Locale locale) {
+        if (price.isEmpty()){
+            return null;
         }
-        if (quantityIntValue <= 0) {
-            throw new NumberFormatException("Quantity must be a positive number");
+        BigDecimal priceValue = null;
+        try {
+            NumberFormat numberFormat = NumberFormat.getInstance(locale);
+            Number priceNumber = numberFormat.parse(price);
+            validatePositiveNumber(priceNumber);
+            priceValue = BigDecimal.valueOf(priceNumber.doubleValue());
+        } catch (NumberFormatException numberFormatException) {
+            priceErrors.put(priceParameterName, numberFormatException.getMessage());
+        } catch (ParseException parseException) {
+            priceErrors.put(priceParameterName, Message.Error.NOT_A_NUMBER);
         }
-        return quantityIntValue;
+        return priceValue;
+    }
+
+    @Override
+    public void validateMinMaxPrices(BigDecimal minPrice, BigDecimal maxPrice, Map<String, String> priceErrors) {
+        if (Objects.nonNull(minPrice) && Objects.nonNull(maxPrice) && minPrice.doubleValue() > maxPrice.doubleValue()) {
+            priceErrors.put(RequestAttribute.PRICE_ERROR, Message.Error.MIN_LESS_MAX_PRICE);
+        }
+    }
+
+    private void validatePositiveNumber(Number number){
+        if (number.doubleValue() < 0) {
+            throw new NumberFormatException("Must be a positive number");
+        }
+    }
+
+    private void validateIntegerNumber(Number number){
+        if (number.doubleValue() != number.intValue()) {
+            throw new NumberFormatException("Must be an integer number");
+        }
     }
 
 }
